@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeamStatica", "BeamStatica\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeamStaticaTests", "BeamStaticaTests\BeamStaticaTests.csproj", "{03E870C7-F372-44DD-ABE5-32F5FF125450}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWPF", "TestWPF\TestWPF.csproj", "{41BAE15A-F81F-4FBD-8D91-44D4C04303D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,10 @@ Global
 		{03E870C7-F372-44DD-ABE5-32F5FF125450}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03E870C7-F372-44DD-ABE5-32F5FF125450}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03E870C7-F372-44DD-ABE5-32F5FF125450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41BAE15A-F81F-4FBD-8D91-44D4C04303D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41BAE15A-F81F-4FBD-8D91-44D4C04303D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41BAE15A-F81F-4FBD-8D91-44D4C04303D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41BAE15A-F81F-4FBD-8D91-44D4C04303D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace BeamStatica.Loads.PointLoads
 {
-    public abstract class ConcentratedLoad : ILoadValue, IPosition
+    public abstract class ConcentratedLoad : ILoad
     {
         public double Value { get; set; }
         public double Position { get; set; }
+
+        public abstract double CalculateShear();
+        public abstract double CalculateBendingMoment(double distanceFromLoad);
 
         protected ConcentratedLoad(double value)
         {

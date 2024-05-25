@@ -1,17 +1,17 @@
-﻿using BeamStatica.Loads.ContinousLoads;
+﻿using BeamStatica._spans.Interfaces;
+using BeamStatica.Loads.ContinousLoads;
 using BeamStatica.Loads.Interfaces;
 using BeamStatica.Materials.Intefaces;
 using BeamStatica.Nodes;
 using BeamStatica.Nodes.Interfaces;
 using BeamStatica.Sections.Interfaces;
-using BeamStatica.Spans.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tools;
 
-namespace BeamStatica.Spans
+namespace BeamStatica._spans
 {
     public class Span : ISpan
     {
@@ -30,7 +30,7 @@ namespace BeamStatica.Spans
         public IMomentOfInteria Section { get; }
 
         public ICollection<ContinousLoad> ContinousLoads { get; set; }
-        public ICollection<(IPosition placement, ILoadValue loadValue)> PointLoads { get; set; }
+        public ICollection<ILoad> PointLoads { get; set; }
 
         public StiffnessMatrix StiffnessMatrix { get; }
         public Vector<double> LoadVector { get; private set; }
@@ -46,7 +46,7 @@ namespace BeamStatica.Spans
             Section = section ?? throw new ArgumentNullException(nameof(section));
 
             ContinousLoads = new List<ContinousLoad>();
-            PointLoads = new List<(IPosition, ILoadValue)>();
+            PointLoads = new List<ILoad>();
             StiffnessMatrix = new StiffnessMatrix(this);
         }
 
@@ -54,11 +54,11 @@ namespace BeamStatica.Spans
         {
             LoadVector = Vector<double>.Build.Dense(4);
 
-            LoadVector[0] = ContinousLoads.Sum(cl => CalculateShear(cl, leftNode:true)) +
-                PointLoads.Sum(pl => CalculateShearFromPointLoad(pl, leftNode:true));
+            LoadVector[0] = ContinousLoads.Sum(cl => CalculateShear(cl, leftNode: true)) +
+                PointLoads.Sum(pl => CalculateShearFromPointLoad(pl, leftNode: true));
 
             LoadVector[1] = ContinousLoads.Sum(cl => CalculateBendingMoment(cl, leftNode: true)) +
-                PointLoads.Sum(pl => CalculateMomentFromPointLoad(pl, leftNode:true));
+                PointLoads.Sum(pl => CalculateMomentFromPointLoad(pl, leftNode: true));
 
             LoadVector[2] = ContinousLoads.Sum(cl => CalculateShear(cl, leftNode: false)) +
                PointLoads.Sum(pl => CalculateShearFromPointLoad(pl, leftNode: false));
@@ -69,7 +69,7 @@ namespace BeamStatica.Spans
 
         public void CalculateDisplacement(Vector<double> deflectionVector, int numberOfDegreesOfFreedom)
         {
-            Displacements  = Vector<double>.Build.Dense(4);
+            Displacements = Vector<double>.Build.Dense(4);
 
             if (LeftNode.MovementNumber < numberOfDegreesOfFreedom)
                 Displacements[0] = deflectionVector[LeftNode.MovementNumber];
@@ -80,34 +80,46 @@ namespace BeamStatica.Spans
             if (RightNode.RotationNumber < numberOfDegreesOfFreedom)
                 Displacements[3] = deflectionVector[RightNode.RotationNumber];
         }
+               
+        public void SetDisplacement()
+        {
+            if (LeftNode.Rotation != null)
+                LeftNode.Rotation.Value = Displacements[0];
+            if (LeftNode.Deflection != null)
+                LeftNode.Deflection.Value = Displacements[1];
+            if (RightNode.Rotation != null)
+                RightNode.Rotation.Value = Displacements[2];
+            if (RightNode.Deflection != null)
+                RightNode.Deflection.Value = Displacements[3];
+        }
 
         public void CalculateForce()
         {
             Forces = StiffnessMatrix.Matrix.Multiply(Displacements).Add(LoadVector);
         }
 
-        private double CalculateMomentFromPointLoad((IPosition placement, ILoadValue loadValue) pointLoad, bool leftNode)
+        private double CalculateMomentFromPointLoad(ILoad pointLoad, bool leftNode)
         {
             double sign = leftNode ? 1.0 : -1.0;
-            double distanceFromCloserNode = leftNode ? pointLoad.placement.Position : Length - pointLoad.placement.Position;
-            double distanceFromOtherNode = leftNode ? Length - pointLoad.placement.Position : pointLoad.placement.Position;
-            return sign * (-pointLoad.loadValue.Value * distanceFromCloserNode * Math.Pow(distanceFromOtherNode, 2)) / Math.Pow(Length, 2);
+            double distanceFromCloserNode = leftNode ? pointLoad.Position : Length - pointLoad.Position;
+            double distanceFromOtherNode = leftNode ? Length - pointLoad.Position : pointLoad.Position;
+            return sign * (-pointLoad.Value * distanceFromCloserNode * Math.Pow(distanceFromOtherNode, 2)) / Math.Pow(Length, 2);
         }
 
-        private double CalculateShearFromPointLoad((IPosition placement, ILoadValue loadValue) pointLoad, bool leftNode)
+        private double CalculateShearFromPointLoad(ILoad pointLoad, bool leftNode)
         {
-            double distanceFromCloserNode = leftNode ? pointLoad.placement.Position : Length - pointLoad.placement.Position;
-            double distanceFromOtherNode = leftNode ? Length - pointLoad.placement.Position : pointLoad.placement.Position;
-            return (-pointLoad.loadValue.Value * Math.Pow(distanceFromOtherNode, 2) * 
-                (3 * distanceFromCloserNode + distanceFromOtherNode)) / 
+            double distanceFromCloserNode = leftNode ? pointLoad.Position : Length - pointLoad.Position;
+            double distanceFromOtherNode = leftNode ? Length - pointLoad.Position : pointLoad.Position;
+            return (-pointLoad.Value * Math.Pow(distanceFromOtherNode, 2) *
+                (3 * distanceFromCloserNode + distanceFromOtherNode)) /
                 Math.Pow(Length, 3);
         }
 
         private double CalculateBendingMoment(ContinousLoad continousLoad, bool leftNode)
         {
             double sign = leftNode ? 1.0 : -1.0;
-            double closerLoad = leftNode ? -continousLoad.StartLoad.Value : -continousLoad.EndLoad.Value;
-            double furtherLoad = leftNode ? -continousLoad.EndLoad.Value : -continousLoad.StartLoad.Value;
+            double closerLoad = leftNode ? -continousLoad.StartPosition.Value : -continousLoad.EndPosition.Value;
+            double furtherLoad = leftNode ? -continousLoad.EndPosition.Value : -continousLoad.StartPosition.Value;
             double distanceFromCalculatedNode = leftNode ? continousLoad.StartPosition.Position : Length - continousLoad.EndPosition.Position;
             double loadLength = continousLoad.EndPosition.Position - continousLoad.StartPosition.Position;
             double distanceToOtherNode = leftNode ? Length - continousLoad.EndPosition.Position : continousLoad.StartPosition.Position;
@@ -132,26 +144,26 @@ namespace BeamStatica.Spans
 
         private double CalculateShear(ContinousLoad continousLoad, bool leftNode)
         {
-            double closerLoad = leftNode ? -continousLoad.StartLoad.Value : -continousLoad.EndLoad.Value;
-            double furtherLoad = leftNode ? -continousLoad.EndLoad.Value : -continousLoad.StartLoad.Value;
+            double closerLoad = leftNode ? -continousLoad.StartPosition.Value : -continousLoad.EndPosition.Value;
+            double furtherLoad = leftNode ? -continousLoad.EndPosition.Value : -continousLoad.StartPosition.Value;
             double distanceFromCalculatedNode = leftNode ? continousLoad.StartPosition.Position : Length - continousLoad.EndPosition.Position;
             double loadLength = continousLoad.EndPosition.Position - continousLoad.StartPosition.Position;
             double distanceToOtherNode = leftNode ? Length - continousLoad.EndPosition.Position : continousLoad.StartPosition.Position;
 
             return 1.0 / 20 * furtherLoad * loadLength *
-                (3 * Math.Pow(loadLength, 3) + 
-                5 * Math.Pow(loadLength, 2) * distanceFromCalculatedNode + 
+                (3 * Math.Pow(loadLength, 3) +
+                5 * Math.Pow(loadLength, 2) * distanceFromCalculatedNode +
                 10 * Math.Pow(distanceToOtherNode, 3) +
-                30 * Math.Pow(distanceToOtherNode, 2) * loadLength + 
+                30 * Math.Pow(distanceToOtherNode, 2) * loadLength +
                 30 * Math.Pow(distanceToOtherNode, 2) * distanceFromCalculatedNode +
                 15 * Math.Pow(loadLength, 2) * distanceToOtherNode +
                 20 * distanceFromCalculatedNode * loadLength * distanceToOtherNode) /
                 Math.Pow(Length, 3) +
                 1.0 / 20 * closerLoad * loadLength *
-                (7 * Math.Pow(loadLength, 3) + 
-                15 * Math.Pow(loadLength, 2) * distanceFromCalculatedNode + 
+                (7 * Math.Pow(loadLength, 3) +
+                15 * Math.Pow(loadLength, 2) * distanceFromCalculatedNode +
                 10 * Math.Pow(distanceToOtherNode, 3) +
-                 30 * Math.Pow(distanceToOtherNode, 2) * loadLength + 
+                 30 * Math.Pow(distanceToOtherNode, 2) * loadLength +
                  30 * Math.Pow(distanceToOtherNode, 2) * distanceFromCalculatedNode +
                  25 * Math.Pow(loadLength, 2) * distanceToOtherNode +
                  40 * distanceFromCalculatedNode * loadLength * distanceToOtherNode) /

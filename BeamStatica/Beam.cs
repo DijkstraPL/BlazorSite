@@ -1,6 +1,8 @@
 ﻿using BeamStatica.Loads.PointLoads;
 using BeamStatica.Nodes.Interfaces;
-using BeamStatica.Spans;
+using BeamStatica.Results.Interfaces;
+using BeamStatica.Results.OnSpan;
+using BeamStatica._spans;
 using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
@@ -8,11 +10,17 @@ using System.Linq;
 
 namespace BeamStatica
 {
+
     public class Beam
     {
+        public IGetResult ShearResult { get; }
+        public IGetResult BendingMomentResult { get; }
+        public IGetResult RotationResult { get; }
+        public IGetResult DeflectionResult { get; }
+
         public short NumberOfDegreesOfFreedom { get; private set; }
 
-        public ICollection<Span> Spans { get; }
+        public IList<Span> Spans { get; }
         public ICollection<INode> Nodes { get; }
 
         public GlobalStiffnessMatrix GlobalStiffnessMatrix { get; }
@@ -22,12 +30,16 @@ namespace BeamStatica
 
         public Vector<double> DeflectionVector { get; private set; }
 
-        public Beam(ICollection<Span> spans, ICollection<INode> nodes)
+        public Beam(IList<Span> spans, ICollection<INode> nodes)
         {
             Spans = spans ?? throw new ArgumentNullException(nameof(spans));
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
 
             GlobalStiffnessMatrix = new GlobalStiffnessMatrix(this);
+            ShearResult = new ShearResult(Spans);
+            BendingMomentResult = new BendingMomentResult(Spans);
+            RotationResult = new RotationResult(Spans);
+            DeflectionResult = new DeflectionResult(Spans);
         }
 
         public void Calculate()
@@ -43,6 +55,7 @@ namespace BeamStatica
             CalculateForces();
             CalculateReactions();
         }
+
 
         private void SetNumeration()
         {
@@ -82,7 +95,7 @@ namespace BeamStatica
 
         private void CalculateSpanLoadVector()
         {
-           SpanLoadVector = Vector<double>.Build.Dense(NumberOfDegreesOfFreedom);
+            SpanLoadVector = Vector<double>.Build.Dense(NumberOfDegreesOfFreedom);
             foreach (var span in Spans)
                 CalculateSpanLoadVectorForCurrentSpan(span);
         }
@@ -95,7 +108,10 @@ namespace BeamStatica
         private void CalculateDisplacements()
         {
             foreach (var span in Spans)
+            {
                 span.CalculateDisplacement(DeflectionVector, NumberOfDegreesOfFreedom);
+                span.SetDisplacement();
+            }
         }
 
         private void CalculateForces()

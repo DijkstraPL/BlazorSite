@@ -15,5 +15,11 @@ namespace BeamStatica.Loads.PointLoads
         public ShearLoad(double value, double position) : base(value, position)
         {
         }
+
+        public override double CalculateShear() 
+            => this.Value;
+
+        public override double CalculateBendingMoment(double distanceFromLoad) 
+            => this.Value * distanceFromLoad;
     }
 }

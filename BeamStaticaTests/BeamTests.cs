@@ -3,7 +3,7 @@ using BeamStatica.Loads.PointLoads;
 using BeamStatica.Materials;
 using BeamStatica.Nodes;
 using BeamStatica.Sections;
-using BeamStatica.Spans;
+using BeamStatica._spans;
 using NUnit.Framework;
 using System.Linq;
 
@@ -63,10 +63,10 @@ namespace BeamStatica.Tests
             var endLoad3 = new ShearLoad(0, 10);
             var pointLoad = new ShearLoad(-150, 3);
 
-            span3.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad, startLoad, endLoad));
-            span3.ContinousLoads.Add(new ContinousLoad(startLoad2, endLoad2, startLoad2, endLoad2));
-            span3.ContinousLoads.Add(new ContinousLoad(startLoad3, endLoad3, startLoad3, endLoad3));
-            span1.PointLoads.Add((pointLoad, pointLoad));
+            span3.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad));
+            span3.ContinousLoads.Add(new ContinousLoad(startLoad2, endLoad2));
+            span3.ContinousLoads.Add(new ContinousLoad(startLoad3, endLoad3));
+            span1.PointLoads.Add(pointLoad);
 
             var beam = new Beam(spans, nodes);
 
@@ -128,8 +128,8 @@ namespace BeamStatica.Tests
             var endLoad = new ShearLoad(0, 6);
             var pointLoad = new ShearLoad(-150, 5);
 
-            span1.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad, startLoad, endLoad));
-            span3.PointLoads.Add((pointLoad, pointLoad));
+            span1.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad));
+            span3.PointLoads.Add(pointLoad);
 
             var beam = new Beam(spans, nodes);
 
@@ -188,7 +188,7 @@ namespace BeamStatica.Tests
             var startLoad = new ShearLoad(-30, 2);
             var endLoad = new ShearLoad(-30, 6);
 
-            span3.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad, startLoad, endLoad));
+            span3.ContinousLoads.Add(new ContinousLoad(startLoad, endLoad));
 
             var beam = new Beam(spans, nodes);
 

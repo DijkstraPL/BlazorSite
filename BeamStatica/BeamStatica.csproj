@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BeamStatica</RootNamespace>
     <AssemblyName>BeamStatica</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MathNet.Numerics, Version=4.6.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -49,11 +51,11 @@
   <ItemGroup>
     <Compile Include="Beam.cs" />
     <Compile Include="GlobalStiffnessMatrix.cs" />
-    <Compile Include="Loads\Interfaces\IPosition.cs" />
+    <Compile Include="Loads\Interfaces\ILoad.cs" />
+    <Compile Include="Loads\Interfaces\ILoadPosition.cs" />
     <Compile Include="Loads\PointLoads\BendingMoment.cs" />
     <Compile Include="Loads\PointLoads\ConcentratedLoad.cs" />
     <Compile Include="Loads\ContinousLoads\ContinousLoad.cs" />
-    <Compile Include="Loads\Interfaces\ILoadValue.cs" />
     <Compile Include="Loads\PointLoads\ShearLoad.cs" />
     <Compile Include="Materials\Intefaces\IYoungModulus.cs" />
     <Compile Include="Materials\Material.cs" />
@@ -69,12 +71,17 @@
     <Compile Include="Nodes\SupportedNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\Displacements\Displacement.cs" />
+    <Compile Include="Results\Interfaces\IGetResult.cs" />
+    <Compile Include="Results\OnSpan\BendingMomentResult.cs" />
+    <Compile Include="Results\OnSpan\DeflectionResult.cs" />
+    <Compile Include="Results\OnSpan\RotationResult.cs" />
     <Compile Include="Results\Reactions\BendingMoment.cs" />
     <Compile Include="Results\Displacements\Deflection.cs" />
     <Compile Include="Results\Displacements\Rotation.cs" />
     <Compile Include="Results\Interfaces\IResultValue.cs" />
     <Compile Include="Results\Reactions\Reaction.cs" />
     <Compile Include="Results\Reactions\ShearForce.cs" />
+    <Compile Include="Results\OnSpan\ShearResult.cs" />
     <Compile Include="Spans\Interfaces\ILengthProvider.cs" />
     <Compile Include="Spans\Interfaces\ISpan.cs" />
     <Compile Include="Spans\Span.cs" />
@@ -93,5 +100,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

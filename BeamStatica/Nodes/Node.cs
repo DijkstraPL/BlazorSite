@@ -18,7 +18,7 @@ namespace BeamStatica.Nodes
 
         public virtual short DegreesOfFreedom { get; }
 
-        public ICollection<ILoadValue> ConcentratedForces { get; set; } = new List<ILoadValue>();
+        public ICollection<ILoad> ConcentratedForces { get; set; } = new List<ILoad>();
 
         public IResultValue BendingMoment { get; protected set; } = null;
         public IResultValue ShearForce { get; protected set; } = null;

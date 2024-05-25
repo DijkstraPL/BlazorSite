@@ -9,5 +9,6 @@ namespace BeamStatica.Results.Displacements
 {
     public sealed class Rotation : Displacement
     {
+        public override string ToString() => Value.ToString();
     }
 }

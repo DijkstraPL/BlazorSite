@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BeamStatica.Spans
+namespace BeamStatica._spans
 {
     public class StiffnessMatrix
     {
